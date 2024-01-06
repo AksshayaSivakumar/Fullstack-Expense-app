@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Expense Tracker</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+  </head>
+  <body>
+    <header id="main-header" class="bg-success text-white p-4 mb-5 text-center">
+      <h1>Expense Tracker</h1>
+    </header>
+
+    <div class="container">
+      <section class="content">
+        <h3 class="secondTitle mb-3">Add a new item: </h3>
+      
+        <form id="my-form" action="/admin/post-expense" class="form-control-inline" onsubmit="postexpense(event);" method="POST">
+        
+          <label for="type" class="form-group mr-2" >Payment mode: </label>
+          <select id="type" type="text" class="form-group mr-2" >
+              <option value="choose one...">Choose one...</option>
+              <option  value="Card">Card</option>
+              <option value="Cash">Cash</option>
+          </select>
+      
+          
+
+          <label for="name" class="form-group mr-2  mr-2">Type of Expense : </label>
+          <input type="text" class="form-group mr-2  mr-2" id="name">
+        
+     
+
+      
+          <label for="date" class="form-group mr-2  mr-2">Date :</label>
+          <input type="date" class="form-group mr-2  mr-2" id="date">
+      
+      
+          <label for="amount" class="form-group mr-2  mr-2" >Amount : </label>
+          <input type="number" class="form-group mr-2  mr-2" id="amount"><br>
+      
+          <button style="display: block; margin-left: auto; margin-right: auto;">Add Expense</button>
+        </form>
+
+      <ul id="expenses" class="list-group" ></ul>
+
+     
+    </section>
+    </div>
+
+
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.1/axios.min.js"></script>
+   
+<script>
+    async function postexpense(event)
+   {
+   
+   try {
+       event.preventDefault();
+   const type=document.getElementById('type').value;
+   const name=document.getElementById('name').value;
+   const date=document.getElementById('date').value;
+   const amount=document.getElementById('amount').value;
+   
+   const expense={
+       
+       type,
+       name,
+       date,
+       amount
+   }
+       
+       const res = await axios.post("http://localhost:3004/admin/post-expense",expense)
+   
+       showExpenseOnScreen(res.data.newExpenseDetail);
+       
+       document.getElementById('type').value = ''; // Clear the type
+       document.getElementById('name').value = ''; // Clear the name field
+       document.getElementById('date').value = ''; // Clear the date field
+       document.getElementById('amount').value = ''; // Clear the amount field
+       
+   } catch (error) {
+       //document.body.innerHTML=document.body.innerHTML+'<h4>Something Went Wrong</h4>';
+       console.log(error);
+   }
+   }
+
+   window.addEventListener("DOMContentLoaded", async () => {
+    
+try {
+    const res = await axios.get("http://localhost:3004/admin/get-expense")
+
+    //console.log(res.data.allUsers);
+    // data is in the format of array
+
+    for(i=0;i<res.data.allExpenses.length;i++)
+    {
+        showExpenseOnScreen(res.data.allExpenses[i])
+        console.log(res.data.allExpenses[i]);
+    }
+} catch (err) {
+  //document.body.innerHTML= document.body.innerHTML+"<h4>Something Went Wrong</h4>"
+  console.log(err)
+}
+})
+
+function showExpenseOnScreen(expense)
+{
+    let parentNode=document.getElementById('expenses');
+    const childNode=`<li id=${expense.id}> ${expense.type}- ${expense.name}- ${expense.date}- $${expense.amount}
+                        <button onclick=deleteexpense('${expense.id}')>Delete</button>
+                        <button onclick=editexpense('${expense.id}','${expense.type}','${expense.name}','${expense.date}','${expense.amount}',)>Edit</button>`
+
+    parentNode.innerHTML=parentNode.innerHTML+childNode; 
+
+
+}
+
+async function deleteexpense(expenseid)
+{
+
+    try {
+        await axios.delete(`http://localhost:3004/admin/delete-expense/${expenseid}`);
+        removeFromScreen(expenseid);
+    } catch (err) {
+        document.body.innerHTML= document.body.innerHTML+"<h4>Something Went Wrong</h4>"
+    console.log(err);
+    }
+       
+         
+} 
+
+function removeFromScreen(id)
+ {
+     let parent=document.getElementById('expenses');
+    const childNodeDeleted=document.getElementById(id);
+
+    parent.removeChild(childNodeDeleted)
+}
+
+// async function editexpense(expenseid,expensetype,expensename,expensedate,expenseamount)
+// {
+
+//     try {
+//         const data={
+//             id:expenseid,
+//             type:expensetype,
+//             name:expensename,
+//             data:expensedate,
+//             amount:expenseamount
+
+//         }
+      
+//         await axios.put("http://localhost:3004/admin/edit-expense",data);
+      
+        
+
+        
+//     } catch (err) {
+//         document.body.innerHTML= document.body.innerHTML+"<h4>Something Went Wrong</h4>"
+//     console.log(err);
+//     }
+       
+         
+//} 
+
+   
+   
+ </script>   
+</body>
+</html>
+  
+ 
